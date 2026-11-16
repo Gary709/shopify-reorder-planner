@@ -31,8 +31,8 @@ export function ProjectionChart({ sku, arrivalDate }: { sku: SkuPlan; arrivalDat
   return (
     <figure className="chart" id="projection">
       <figcaption>
-        <strong>Stock projection</strong>
-        <span>End of each day. Lost sales stay at zero; they are not backordered.</span>
+        <strong>On the shelf</strong>
+        <span>Spools left at the end of the day. At zero, those sales are just missed.</span>
       </figcaption>
       <svg
         viewBox={`0 0 ${width} ${height}`}
@@ -113,13 +113,13 @@ export function ProjectionChart({ sku, arrivalDate }: { sku: SkuPlan; arrivalDat
       </svg>
       <div className="legend">
         <span>
-          <i className="swatch-line swatch-without" /> Without this shipment
+          <i className="swatch-line swatch-without" /> If I don't order
         </span>
         <span>
-          <i className="swatch-line swatch-with" /> With this shipment
+          <i className="swatch-line swatch-with" /> If this order lands
         </span>
         {identical ? (
-          <span className="legend-note">The lines match: nothing extra arrives on this boat.</span>
+          <span className="legend-note">Same line. Nothing extra on this order.</span>
         ) : null}
       </div>
       {active ? (
@@ -129,24 +129,24 @@ export function ProjectionChart({ sku, arrivalDate }: { sku: SkuPlan; arrivalDat
             <dd>{dayLabel(active.date)}</dd>
           </div>
           <div>
-            <dt>Forecast demand</dt>
+            <dt>Expected sales</dt>
             <dd>{number(active.demand, 2)}</dd>
           </div>
           <div>
-            <dt>Without shipment</dt>
+            <dt>If I don't order</dt>
             <dd>{number(active.withoutOrder, 1)}</dd>
           </div>
           <div>
-            <dt>With shipment</dt>
+            <dt>If this order lands</dt>
             <dd>{number(active.withOrder, 1)}</dd>
           </div>
         </dl>
       ) : (
-        <p className="hover-hint">Hover the chart for a single day.</p>
+        <p className="hover-hint">Hover for one day.</p>
       )}
       {arrivalIndex < 0 ? (
         <p className="hover-hint">
-          Arrival on {dayLabel(arrivalDate)} is past the end of this chart.
+          The boat lands {dayLabel(arrivalDate)}, past the end of this chart.
         </p>
       ) : null}
     </figure>

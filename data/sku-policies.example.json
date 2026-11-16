@@ -1,4 +1,4 @@
 {
-  "TF-PLA-BLK-1KG": { "moq": 20, "cartonSize": 10 },
-  "TF-TPU-BLK-1KG": { "moq": 10, "cartonSize": 5 }
+  "TF-PLA BASIC-1KG-BLACK": { "moq": 10, "cartonSize": 10 },
+  "TF-PETG-1KG-BLACK": { "moq": 10, "cartonSize": 10 }
 }

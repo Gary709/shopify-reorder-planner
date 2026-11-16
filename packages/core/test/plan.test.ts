@@ -152,7 +152,7 @@ describe('planStore', () => {
       settings(),
     );
     expect(plan.historyDays).toBe(10);
-    expect(plan.warnings[0]).toMatch(/shortened/i);
+    expect(plan.warnings[0]).toMatch(/short of/i);
     expect(plan.skus[0]?.forwardDailyVelocity).toBeCloseTo(2, 6);
     expect(plan.ignoredOrderUnits).toBe(0);
   });

@@ -52,7 +52,7 @@ export function App() {
           <div className="brand">
             <Spool />
             <div>
-              <p className="eyebrow light">Sea-freight reorder planner</p>
+              <p className="eyebrow light">Canberra · boat from China</p>
               <h1>{plan?.shopName ?? 'Reorder planner'}</h1>
             </div>
           </div>
@@ -85,19 +85,23 @@ export function App() {
           }}
         />
         {error ? <p className="banner error">{error}</p> : null}
-        {loading && !plan ? <p className="loading">Building the plan…</p> : null}
+        {loading && !plan ? <p className="loading">Working out the order…</p> : null}
         {plan ? (
           <>
             <section className="metrics" aria-label="Plan summary">
-              <Metric label="Variants" value={units(plan.skus.length)} />
-              <Metric label="At risk before arrival" value={units(atRisk)} />
-              <Metric label="Units on this boat" value={units(plan.purchaseOrder.totalUnits)} />
+              <Metric label="Colours" value={units(plan.skus.length)} />
+              <Metric label="Out before the boat lands" value={units(atRisk)} />
+              <Metric label="Units to order" value={units(plan.purchaseOrder.totalUnits)} />
               <Metric
-                label={plan.purchaseOrder.hasUnknownCost ? 'Known shipment cost' : 'Shipment cost'}
-                value={money(plan.purchaseOrder.knownCost, plan.currency)}
+                label="Order cost"
+                value={
+                  plan.purchaseOrder.hasUnknownCost && plan.purchaseOrder.knownCost === 0
+                    ? 'not on file'
+                    : money(plan.purchaseOrder.knownCost, plan.currency)
+                }
               />
             </section>
-            {loading ? <p className="loading inline">Updating the plan…</p> : null}
+            {loading ? <p className="loading inline">Updating…</p> : null}
             {plan.warnings.map((warning) => (
               <p key={warning} className="banner warn">
                 {warning}
@@ -108,13 +112,13 @@ export function App() {
               plan.ignoredOrderUnits > 0) && (
               <p className="section-note catalogue-notes">
                 {plan.skippedWithoutSku > 0
-                  ? `${plan.skippedWithoutSku} variants had no SKU and were skipped. `
+                  ? `${plan.skippedWithoutSku} variants had no SKU, so they are skipped. `
                   : ''}
                 {plan.mergedDuplicateSkus > 0
-                  ? `${plan.mergedDuplicateSkus} duplicate SKUs were merged. `
+                  ? `${plan.mergedDuplicateSkus} duplicate SKUs were added together. `
                   : ''}
                 {plan.ignoredOrderUnits > 0
-                  ? `${units(plan.ignoredOrderUnits)} ordered units had no matching SKU and were left out of velocity.`
+                  ? `${units(plan.ignoredOrderUnits)} sold units had no matching colour and are not in the sales rate.`
                   : ''}
               </p>
             )}
@@ -129,23 +133,24 @@ export function App() {
                 <SkuDetail plan={plan} sku={selectedSku} />
               ) : (
                 <section className="card detail-card">
-                  <p>No variants to plan.</p>
+                  <p>No colours to order.</p>
                 </section>
               )}
             </div>
             <PurchaseOrder plan={plan} />
             <details className="assumptions">
-              <summary>Assumptions in this plan</summary>
+              <summary>How I work the numbers</summary>
               <ul>
                 {plan.assumptions.map((assumption) => (
                   <li key={assumption}>{assumption}</li>
                 ))}
               </ul>
               <p>
-                Reorder point = lead-time demand + safety stock. Safety stock = z × daily residual σ
-                × √days. The order-up-to level uses the lead time plus the review period. z for this
-                plan is {plan.serviceLevelZ.toFixed(3)} at a{' '}
-                {(plan.settings.serviceLevel * 100).toFixed(1)}% service level.
+                Reorder point is sales over the lead time, plus a buffer. The buffer is z times the
+                day-to-day noise times the square root of the days. z here is{' '}
+                {plan.serviceLevelZ.toFixed(2)} because I set the service level to{' '}
+                {Math.round(plan.settings.serviceLevel * 100)}%. The qty aims to last until the boat
+                after this one.
               </p>
             </details>
           </>

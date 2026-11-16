@@ -1,14 +1,5 @@
-/**
- * Read-only Admin GraphQL. Documented against 2026-10:
- * https://shopify.dev/docs/api/admin-graphql/2026-10/queries/shop
- * https://shopify.dev/docs/api/admin-graphql/2026-10/queries/products
- * https://shopify.dev/docs/api/admin-graphql/2026-10/queries/orders
- * https://shopify.dev/docs/api/admin-graphql/2026-10/queries/order
- * https://shopify.dev/docs/apps/build/inventory-management-apps/manage-quantities-states
- *
- * Required scopes: read_products, read_inventory, read_orders.
- * unitCost is returned only when the token can view product costs.
- */
+// Read-only. Scopes: read_products, read_inventory, read_orders.
+// unitCost only comes back if the token can see product costs.
 
 export const SHOP_QUERY = `
   query PlannerShop {

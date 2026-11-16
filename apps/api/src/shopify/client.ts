@@ -103,7 +103,7 @@ export async function fetchShopifySnapshot(
     timeZone: shop.timeZone,
     source: 'shopify',
     synthetic: false,
-    disclaimer: `Live read from ${shop.name}. The Admin API token is used read-only (products, inventory, orders). Nothing is written back to Shopify. Unit cost appears only when the token can view product costs. MOQ and carton size come from data/sku-policies.json or the planner defaults.`,
+    disclaimer: `Live read from ${shop.name}. Read only, nothing is written back. Cost shows up only if the token can see it. Box size comes from data/sku-policies.json, or the defaults on the form.`,
     shopName: shop.name,
     currency: shop.currency,
   };

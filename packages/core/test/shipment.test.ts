@@ -84,7 +84,7 @@ describe('shipment', () => {
       100,
     );
     expect(shipment.lines).toHaveLength(0);
-    expect(shipment.withheld[0]?.reason).toMatch(/minimum purchasable/i);
+    expect(shipment.withheld[0]?.reason).toMatch(/full box/i);
   });
 
   it('does not let an unknown unit cost consume the budget', () => {

@@ -16,12 +16,12 @@ import type {
 } from './types.js';
 
 const ASSUMPTIONS = [
-  'Daily forecast errors are treated as independent, with constant variance. The weekday pattern and the trend are treated as known.',
-  'Safety stock uses a fixed lead time. It does not add a term for boats that arrive early or late.',
-  'Incoming units are added on the lead-time day. The inventory feed has a quantity but no arrival date.',
-  'A shipment placed today cannot refill sales that happen before it arrives. The suggested quantity covers the review cycle after arrival.',
-  'The suggested quantity is the raw gap to the order-up-to level, rounded up to the MOQ and then to a whole number of cartons. A raw gap of zero stays zero.',
-  'The shipment is one boat. Under a budget cap, SKUs are filled soonest stock-out first.',
+  "Each day's miss is treated as independent. The weekday pattern and the trend are taken as given.",
+  'The boat takes a fixed number of days. Early or late arrivals are not in the safety stock.',
+  'Stock already on the water is added on the lead-time day. Shopify does not send an arrival date.',
+  'Ordering today does not cover sales missed before the boat lands.',
+  'A gap of zero stays zero. Otherwise the qty rounds up to the minimum, then to a full box.',
+  'One order. If there is a budget, colours that run out sooner get the money first.',
 ];
 
 export function planStore(snapshot: StoreSnapshot, settings: PlannerSettings): PlanResult {
@@ -35,7 +35,7 @@ export function planStore(snapshot: StoreSnapshot, settings: PlannerSettings): P
   if (historyStart > requestedStart) {
     const available = diffDays(snapshot.historyStart, snapshot.asOf);
     warnings.push(
-      `Lookback was shortened from ${settings.lookbackDays} days to ${diffDays(historyStart, snapshot.asOf)} days because history starts on ${snapshot.historyStart} (${available} days before the planning date). Earlier days are not filled with zeros.`,
+      `Orders only go back to ${snapshot.historyStart} (${available} days), short of the ${settings.lookbackDays}-day lookback. I did not fill the gap with zero sales.`,
     );
   }
 

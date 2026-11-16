@@ -8,12 +8,12 @@ export function PurchaseOrder({ plan }: { plan: PlanResult }) {
     <section className="card po-card" id="shipment" aria-label="Suggested shipment">
       <div className="card-head">
         <div>
-          <h2>One shipment</h2>
+          <h2>This order</h2>
           <p className="section-note">
-            Grouped onto a single boat, soonest stock-out first.
+            One boat from China. Colours that run out sooner go on first.
             {shipment.budgetCap === null
-              ? ' No budget cap is set.'
-              : ` Budget cap ${money(shipment.budgetCap, plan.currency)}.`}
+              ? ' No spend limit.'
+              : ` Limit ${money(shipment.budgetCap, plan.currency)}.`}
           </p>
         </div>
         <button
@@ -31,13 +31,14 @@ export function PurchaseOrder({ plan }: { plan: PlanResult }) {
             <li key={group.productType}>
               <strong>{group.productType}</strong>
               <span>
-                {units(group.units)} units · {money(group.knownCost, plan.currency)}
+                {units(group.units)} units
+                {group.knownCost > 0 ? ` · ${money(group.knownCost, plan.currency)}` : ''}
               </span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="section-note">Nothing to put on this boat with the current settings.</p>
+        <p className="section-note">Nothing to order with these settings.</p>
       )}
       {shipment.lines.length > 0 ? (
         <div className="table-scroll">
@@ -49,7 +50,7 @@ export function PurchaseOrder({ plan }: { plan: PlanResult }) {
                 <th scope="col">Cartons</th>
                 <th scope="col">Unit cost</th>
                 <th scope="col">Line cost</th>
-                <th scope="col">Why it is on the boat</th>
+                <th scope="col">Why</th>
               </tr>
             </thead>
             <tbody>
@@ -78,8 +79,9 @@ export function PurchaseOrder({ plan }: { plan: PlanResult }) {
       <footer className="po-total">
         <span>{units(shipment.totalUnits)} units</span>
         <strong>
-          {money(shipment.knownCost, plan.currency)}
-          {shipment.hasUnknownCost ? ' known' : ''}
+          {shipment.hasUnknownCost && shipment.knownCost === 0
+            ? 'Cost not on file'
+            : money(shipment.knownCost, plan.currency)}
         </strong>
         {shipment.budgetRemaining !== null ? (
           <span>{money(shipment.budgetRemaining, plan.currency)} left of the cap</span>
@@ -87,13 +89,14 @@ export function PurchaseOrder({ plan }: { plan: PlanResult }) {
       </footer>
       {shipment.hasUnknownCost ? (
         <p className="section-note">
-          A line with no unit cost is still listed. It does not draw down the budget cap.
+          No factory cost on file, so this order has no dollar total and a spend limit will not trim
+          it.
         </p>
       ) : null}
       <div className="withheld">
-        <h3>Left off this boat</h3>
+        <h3>Left off</h3>
         {shipment.withheld.length === 0 ? (
-          <p>Nothing was withheld. Every suggested line is already on this boat.</p>
+          <p>Nothing left off.</p>
         ) : (
           <ul>
             {shipment.withheld.map((line) => (

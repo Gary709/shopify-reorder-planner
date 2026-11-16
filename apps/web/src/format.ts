@@ -1,10 +1,10 @@
 import type { SkuStatus } from '@tinyfab/core';
 
 export const STATUS_LABEL: Record<SkuStatus, string> = {
-  'stockout-risk': 'Stock-out risk',
-  reorder: 'Reorder',
-  covered: 'Covered',
-  'no-demand': 'No demand',
+  'stockout-risk': 'Runs out',
+  reorder: 'Order',
+  covered: 'OK',
+  'no-demand': 'No sales',
   untracked: 'Not tracked',
 };
 
@@ -15,11 +15,34 @@ const SWATCHES: Record<string, string> = {
   gray: '#8d8880',
   red: '#a33b32',
   blue: '#24598a',
+  'royal blue': '#1d4e89',
+  'sky blue': '#7eb6d9',
   green: '#2f6b4a',
-  clear: '#d5e3ea',
-  gold: '#c6a15b',
-  natural: '#e4d0b0',
+  mint: '#b7ddd0',
+  orange: '#e07a2f',
+  purple: '#6b4c9a',
+  pink: '#e7a0b4',
+  skin: '#e6c4a8',
+  yellow: '#e3c04d',
+  brown: '#6b4423',
+  lavender: '#c9b6dc',
+  silver: '#c5c8cc',
 };
+
+const LIGHT = new Set([
+  'white',
+  'skin',
+  'yellow',
+  'mint',
+  'silver',
+  'lavender',
+  'pink',
+  'sky blue',
+]);
+
+export function swatchNeedsBorder(variantTitle: string): boolean {
+  return LIGHT.has(variantTitle.trim().toLowerCase());
+}
 
 export function colourSwatch(variantTitle: string): string | null {
   return SWATCHES[variantTitle.trim().toLowerCase()] ?? null;

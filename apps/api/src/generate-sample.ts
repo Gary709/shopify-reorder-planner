@@ -10,12 +10,8 @@ import {
 } from '@tinyfab/core';
 import { sampleStorePath } from './paths.js';
 
-/**
- * Deterministic synthetic catalogue. Base rates, trends, weekday weights, and
- * target cover are generator inputs — not measurements of a real shop.
- * Stock is set from the realised simulated mean so the demo contains a mix of
- * stock-out risk, ordinary reorders, covered SKUs, and a no-demand SKU.
- */
+// Colours, SKUs and shelf prices are copied from tinyfab3d.com.au.
+// Rates, stock and orders are invented so the sample still runs without a token.
 
 const AS_OF = '2026-11-16';
 const HISTORY_DAYS = 180;
@@ -31,12 +27,9 @@ interface Spec {
   productTitle: string;
   variantTitle: string;
   productType: string;
-  unitCost: number;
   unitPrice: number;
   baseDailyRate: number;
-  /** Fractional change from the start of the window to the end, centred on the base rate. */
   trendFraction: number;
-  /** Target days of cover used only to choose a starting stock figure. Null means fixed stock and no demand. */
   targetCoverDays: number | null;
   fixedAvailable?: number;
   committed: number;
@@ -45,60 +38,85 @@ interface Spec {
   cartonSize: number;
 }
 
+const PLA = 'TinyFab PLA Basic 1.75mm 1kg';
+const MATTE = 'TinyFab PLA Matte Filament 1.75mm 1kg';
+const PETG = 'TinyFab PETG Basic Filament 1.75mm 1kg';
+
 const SPECS: Spec[] = [
-  spec('TF-PLA-BLK-1KG', 'PLA 1kg', 'Black', 'PLA', 9.5, 24, 2.2, 0.45, 10, 2, 0, 20, 10),
-  spec('TF-PLA-WHT-1KG', 'PLA 1kg', 'White', 'PLA', 9.5, 24, 1.4, 0, 72, 0, 0, 20, 10),
-  spec('TF-PLA-GRY-1KG', 'PLA 1kg', 'Grey', 'PLA', 9.5, 24, 1.8, 0.1, 14, 1, 0, 20, 10),
-  spec('TF-PLA-RED-1KG', 'PLA 1kg', 'Red', 'PLA', 9.8, 25, 0.9, 0, 85, 0, 0, 20, 10),
-  spec('TF-PLA-BLU-1KG', 'PLA 1kg', 'Blue', 'PLA', 9.8, 25, 0.55, 0, 240, 0, 0, 20, 10),
-  spec('TF-PLA-GRN-1KG', 'PLA 1kg', 'Green', 'PLA', 9.8, 25, 1.15, 0, 8, 1, 0, 20, 10),
-  spec('TF-PETG-BLK-1KG', 'PETG 1kg', 'Black', 'PETG', 11, 29, 1.05, 0.35, 16, 0, 0, 20, 10),
-  spec('TF-PETG-WHT-1KG', 'PETG 1kg', 'White', 'PETG', 11, 29, 0.7, 0, 78, 0, 20, 20, 10),
-  spec('TF-PETG-CLR-1KG', 'PETG 1kg', 'Clear', 'PETG', 12, 32, 0.5, 0, 20, 0, 0, 10, 10),
-  spec('TF-PETG-BLU-1KG', 'PETG 1kg', 'Blue', 'PETG', 11.5, 30, 0.35, 0, 220, 0, 0, 20, 10),
-  spec('TF-TPU-BLK-1KG', 'TPU 1kg', 'Black', 'TPU', 16, 42, 0.28, 0, 24, 0, 0, 10, 5),
-  spec('TF-TPU-RED-1KG', 'TPU 1kg', 'Red', 'TPU', 16.5, 44, 0.12, -0.2, 260, 0, 0, 10, 5),
-  spec('TF-PLA-SILK-GLD-1KG', 'PLA Silk 1kg', 'Gold', 'PLA', 13, 34, 0.42, 0, 68, 0, 0, 10, 10),
-  spec(
-    'TF-PLA-MAT-NAT-1KG',
-    'PLA Matte 1kg',
-    'Natural',
-    'PLA',
-    10,
-    26,
-    0.85,
-    -0.55,
-    280,
+  // PLA Basic, $16.49. SKUs are the ones on the shop, spaces included.
+  colour('TF-PLA BASIC-1KG-BLACK', PLA, 'Black', 'PLA Basic', 16.49, 2.2, 0.3, 8, 2, 0),
+  colour('TF-PLA BASIC-1KG-WHITE', PLA, 'White', 'PLA Basic', 16.49, 1.5, 0, 12, 1, 0),
+  colour('TF-PLA BASIC-1KG-GREY', PLA, 'Grey', 'PLA Basic', 16.49, 1.1, 0, 14, 0, 0),
+  colour('TF-PLA BASIC-1KG-ROYAL-BLUE', PLA, 'Royal Blue', 'PLA Basic', 16.49, 0.7, 0, 60, 0, 0),
+  colour('TF-PLA-BASIC-1KG-RED', PLA, 'Red', 'PLA Basic', 16.49, 0.45, 0, 70, 0, 0),
+  colour('TF-PLA BASIC-1KG-SKY-BLUE', PLA, 'Sky Blue', 'PLA Basic', 16.49, 0.25, 0, 220, 0, 0),
+  colour('TF-PLA BASIC-1KG-GREEN', PLA, 'Green', 'PLA Basic', 16.49, 0.3, 0, 200, 0, 0),
+  colour('TF-PLA BASIC-1KG-YELLOW', PLA, 'Yellow', 'PLA Basic', 16.49, 0.18, 0, 240, 0, 0),
+  colour('TF-PLA BASIC-1KG-ORANGE', PLA, 'Orange', 'PLA Basic', 16.49, 0.16, 0, 260, 0, 0),
+  colour('TF-PLA BASIC-1KG-PURPLE', PLA, 'Purple', 'PLA Basic', 16.49, 0.14, 0, 280, 0, 0),
+  colour('TF-PLA BASIC-1KG-MINT', PLA, 'Mint', 'PLA Basic', 16.49, 0.12, 0, 300, 0, 0),
+  colour('TF-PLA BASIC-1KG-BROWN', PLA, 'Brown', 'PLA Basic', 16.49, 0.1, 0, 320, 0, 0),
+  colour('TF-PLA-BASIC-1KG-PINK', PLA, 'Pink', 'PLA Basic', 16.49, 0.2, 0, 180, 0, 0),
+  colour('TF-PLA-BASIC-1KG-SKIN', PLA, 'Skin', 'PLA Basic', 16.49, 0.22, 0, 160, 0, 0),
+  // PLA Matte, $17.99.
+  colour('TF-PLA-MATTE-1KG-BLACK', MATTE, 'Black', 'PLA Matte', 17.99, 0.5, 0.1, 26, 0, 0),
+  colour('TF-PLA-MATTE-1KG-GREY', MATTE, 'Grey', 'PLA Matte', 17.99, 0.22, 0, 85, 0, 0),
+  colour('TF-PLA-MATTE-1KG-WHITE', MATTE, 'White', 'PLA Matte', 17.99, 0.2, 0, 200, 0, 0),
+  colour('TF-PLA-MATTE-1KG-GREEN', MATTE, 'Green', 'PLA Matte', 17.99, 0.25, 0, 160, 0, 0),
+  colour('TF-PLA-MATTE-1KG-RED', MATTE, 'Red', 'PLA Matte', 17.99, 0.1, 0, 260, 0, 0),
+  colour('TF-PLA-MATTE-1KG-YELLOW', MATTE, 'Yellow', 'PLA Matte', 17.99, 0.08, 0, 300, 0, 0),
+  colour('TF-PLA-MATTE-1KG-BROWN', MATTE, 'Brown', 'PLA Matte', 17.99, 0, 0, null, 0, 0, 18),
+  // PETG Basic, $15.99.
+  colour('TF-PETG-1KG-BLACK', PETG, 'Black', 'PETG', 15.99, 0.95, 0.25, 16, 0, 0),
+  colour('TF-PETG-1KG-WHITE', PETG, 'White', 'PETG', 15.99, 0.55, 0, 40, 0, 10),
+  colour('TF-PETG-1KG-BLUE', PETG, 'Blue', 'PETG', 15.99, 0.28, 0, 80, 0, 0),
+  colour('TF-PETG-1KG-RED', PETG, 'Red', 'PETG', 15.99, 0.16, 0, 220, 0, 0),
+  colour('TF-PETG-1KG-GREEN', PETG, 'Green', 'PETG', 15.99, 0.14, 0, 240, 0, 0),
+  colour('TF-PETG-1KG-ORANGE', PETG, 'Orange', 'PETG', 15.99, 0.12, 0, 260, 0, 0),
+  colour('TF-PETG-1KG-YELLOW', PETG, 'Yellow', 'PETG', 15.99, 0.1, 0, 280, 0, 0),
+  colour('TF-PETG-1KG-SILVER', PETG, 'Silver', 'PETG', 15.99, 0.18, 0, 200, 0, 0),
+  colour('TF-PETG-1KG-PURPLE', PETG, 'Purple', 'PETG', 15.99, 0.08, 0, 300, 0, 0),
+  colour('TF-PETG-1KG-PINK', PETG, 'Pink', 'PETG', 15.99, 0.08, 0, 320, 0, 0),
+  colour('TF-PETG-1KG-LAVENDER', PETG, 'Lavender', 'PETG', 15.99, 0.07, 0, 340, 0, 0),
+  colour('TF-PETG-1KG-BROWN', PETG, 'Brown', 'PETG', 15.99, 0.22, 0, 160, 0, 0),
+  // Live pack variants have no SKU. One line so the pack still shows up.
+  colour(
+    'TF-PACK-ESSENTIAL',
+    'Essential Starter Pack',
+    '3-spool mix',
+    'Pack',
+    39.9,
+    0.12,
+    0,
+    200,
     0,
     0,
-    20,
-    10,
+    undefined,
+    1,
+    1,
   ),
-  spec('TF-ABS-BLK-1KG', 'ABS 1kg', 'Black', 'ABS', 10.5, 27, 0, 0, null, 0, 0, 20, 10, 36),
 ];
 
-function spec(
+function colour(
   sku: string,
   productTitle: string,
   variantTitle: string,
   productType: string,
-  unitCost: number,
   unitPrice: number,
   baseDailyRate: number,
   trendFraction: number,
   targetCoverDays: number | null,
   committed: number,
   incoming: number,
-  moq: number,
-  cartonSize: number,
   fixedAvailable?: number,
+  moq = 10,
+  cartonSize = 10,
 ): Spec {
   return {
     sku,
     productTitle,
     variantTitle,
     productType,
-    unitCost,
     unitPrice,
     baseDailyRate,
     trendFraction,
@@ -189,7 +207,7 @@ const variants: VariantInput[] = SPECS.map((item) => {
     productTitle: item.productTitle,
     variantTitle: item.variantTitle,
     productType: item.productType,
-    unitCost: item.unitCost,
+    unitCost: null,
     unitPrice: item.unitPrice,
     onHand: available + committed,
     available,
@@ -202,7 +220,7 @@ const variants: VariantInput[] = SPECS.map((item) => {
 });
 
 const disclaimer =
-  'SYNTHETIC SAMPLE. Products, stock, costs, prices, and orders are simulated for an illustrative TinyFab 3D catalogue. They are not the shop’s real records. Prices and unit costs are round inputs chosen for the demo, not market quotes.';
+  'Made-up sample, not TinyFab sales. Colour names, SKUs and shelf prices are from tinyfab3d.com.au. Stock on hand and every order here are invented. The starter pack line TF-PACK-ESSENTIAL is one SKU I added; the live pack variants have none.';
 
 const snapshot: StoreSnapshot = {
   variants,
@@ -213,7 +231,7 @@ const snapshot: StoreSnapshot = {
   source: 'sample',
   synthetic: true,
   disclaimer,
-  shopName: 'TinyFab 3D (sample)',
+  shopName: 'TinyFab 3D',
   currency: 'AUD',
 };
 
@@ -223,7 +241,7 @@ for (const sku of plan.skus) counts.set(sku.status, (counts.get(sku.status) ?? 0
 
 const document = {
   synthetic: true,
-  label: 'SYNTHETIC SAMPLE — not TinyFab 3D’s real catalogue, stock, costs, or sales.',
+  label: 'Made-up sample. Not TinyFab sales.',
   disclaimer,
   shopName: snapshot.shopName,
   currency: snapshot.currency,
@@ -232,7 +250,7 @@ const document = {
   historyStart: snapshot.historyStart,
   generator: {
     seed: SEED,
-    note: 'Demand is simulated. baseDailyRate, trendFraction, weekday weights, and targetCoverDays are inputs to the generator, not measurements.',
+    note: 'baseDailyRate, trendFraction, weekday weights and targetCoverDays are knobs for the fake orders. Not shop figures.',
     weekdayWeightsSunToSat: WEEKDAY,
     skus: SPECS.map((item) => ({
       sku: item.sku,

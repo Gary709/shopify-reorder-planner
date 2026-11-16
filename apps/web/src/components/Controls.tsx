@@ -75,13 +75,13 @@ export function Controls({
       <div className="control-grid">
         <Field
           label="Lead time"
-          hint="days at sea"
+          hint="days on the boat from China"
           value={fields.leadTimeDays}
           onChange={(value) => commit({ ...fields, leadTimeDays: value })}
         />
         <Field
           label="Review period"
-          hint="days until the next boat"
+          hint="days until I order again"
           value={fields.reviewPeriodDays}
           onChange={(value) => commit({ ...fields, reviewPeriodDays: value })}
         />
@@ -96,57 +96,57 @@ export function Controls({
             <option value="0.975">97.5%</option>
             <option value="0.99">99%</option>
           </select>
-          <small>chance of covering lead-time demand</small>
+          <small>how sure I want to be</small>
         </label>
         <Field
           label="Budget cap"
-          hint={`${currency}, blank = no cap`}
+          hint={`${currency}, blank if no limit`}
           value={fields.budgetCap}
           onChange={(value) => commit({ ...fields, budgetCap: value })}
           placeholder="No cap"
         />
       </div>
       <details className="advanced">
-        <summary>History, chart, and packaging</summary>
+        <summary>More settings</summary>
         <div className="control-grid">
           <Field
             label="Lookback"
-            hint="days of orders"
+            hint="days of orders to use"
             value={fields.lookbackDays}
             onChange={(value) => commit({ ...fields, lookbackDays: value })}
           />
           <Field
             label="Moving average"
-            hint="recent days"
+            hint="days in the average"
             value={fields.movingAverageWindow}
             onChange={(value) => commit({ ...fields, movingAverageWindow: value })}
           />
           <Field
             label="Chart horizon"
-            hint="days drawn"
+            hint="days on the chart"
             value={fields.horizonDays}
             onChange={(value) => commit({ ...fields, horizonDays: value })}
           />
           <Field
-            label="Default MOQ"
-            hint="if a SKU has no policy"
+            label="Default minimum"
+            hint="if a colour has no rule"
             value={fields.defaultMoq}
             onChange={(value) => commit({ ...fields, defaultMoq: value })}
           />
           <Field
-            label="Default carton"
-            hint="if a SKU has no policy"
+            label="Default box"
+            hint="spools per box, if unset"
             value={fields.defaultCartonSize}
             onChange={(value) => commit({ ...fields, defaultCartonSize: value })}
           />
           <label className="field check">
-            <span>Packaging override</span>
+            <span>Same box for every colour</span>
             <input
               type="checkbox"
               checked={fields.overridePackaging}
               onChange={(event) => commit({ ...fields, overridePackaging: event.target.checked })}
             />
-            <small>Use the default MOQ and carton for every SKU</small>
+            <small>Ignore each colour's own minimum and box size</small>
           </label>
         </div>
       </details>
@@ -161,7 +161,7 @@ export function Controls({
             onChange(DEFAULT_SETTINGS);
           }}
         >
-          Reset to sea-freight defaults
+          Reset
         </button>
         {message ? <p className="form-error">{message}</p> : null}
       </div>

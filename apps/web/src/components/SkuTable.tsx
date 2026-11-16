@@ -1,6 +1,14 @@
 import { useMemo, useState } from 'react';
 import type { SkuPlan } from '@tinyfab/core';
-import { colourSwatch, dayLabel, money, number, STATUS_LABEL, units } from '../format';
+import {
+  colourSwatch,
+  dayLabel,
+  money,
+  number,
+  STATUS_LABEL,
+  swatchNeedsBorder,
+  units,
+} from '../format';
 
 type SortKey =
   | 'sku'
@@ -69,7 +77,7 @@ export function SkuTable({
           <span className="sr-only">Filter the table</span>
           <input
             value={query}
-            placeholder="Filter SKUs"
+            placeholder="Filter colours"
             onChange={(event) => setQuery(event.target.value)}
           />
         </label>
@@ -154,7 +162,7 @@ export function SkuTable({
             {visible.length === 0 ? (
               <tr>
                 <td colSpan={10} className="empty">
-                  No SKUs match that filter. The shipment below is unchanged.
+                  No colours match. The order below is unchanged.
                 </td>
               </tr>
             ) : (
@@ -179,7 +187,7 @@ export function SkuTable({
                       <span className="sku-name">
                         {swatch ? (
                           <span
-                            className={`swatch${swatch === '#f7f4ee' || swatch === '#d5e3ea' || swatch === '#e4d0b0' ? ' swatch-light' : ''}`}
+                            className={`swatch${swatchNeedsBorder(sku.variantTitle) ? ' swatch-light' : ''}`}
                             style={{ background: swatch }}
                           />
                         ) : null}

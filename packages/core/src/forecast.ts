@@ -17,29 +17,9 @@ export interface DemandModel {
 
 const FLAT_SEASON: SeasonalIndex = [1, 1, 1, 1, 1, 1, 1];
 
-/**
- * Demand model used for every SKU.
- *
- * 1. Weekday indexes are the weekday mean divided by the overall mean, then
- *    rescaled so the seven indexes average to 1. A weekday with no observations
- *    stays at 1 before that rescaling.
- * 2. History is divided by its weekday index. A near-zero index (a weekday that
- *    never sold) is replaced by the overall mean so it does not explode or drag
- *    the level to zero.
- * 3. The recent level is the moving average of the last W deseasonalized days.
- *    The trend is the least-squares slope of the whole lookback, so one noisy
- *    month is not drawn forward across the voyage until the forecast hits zero.
- * 4. A future day is that level plus the slope times the days since the centre
- *    of the window, floored at 0, then multiplied by the weekday index.
- * 5. Residual σ is the sample standard deviation of actual minus that fitted
- *    raw demand on the window. Safety stock treats those residuals as
- *    independent and identically distributed. Weekday pattern and trend are
- *    treated as known.
- *
- * Weekday indexes are estimated on the raw series, so a very steep trend can
- * leak slightly into the indexes. That is acceptable for a short planning
- * window with a mild trend, and it is not a claim of measured seasonality.
- */
+// Level is the recent deseasonalised average. Slope is fit on the whole lookback
+// so one quiet month is not drawn out across the 45-day boat. A near-zero weekday
+// factor is replaced by the overall mean so it does not blow up the series.
 export function fitDemandModel(
   dates: readonly string[],
   quantities: readonly number[],
@@ -97,12 +77,7 @@ export function fitDemandModel(
   };
 }
 
-/**
- * Forecast for `days` dates beginning on `asOf` (index 0 is the planning date).
- * History passed to the fit is assumed to end the day before `asOf`.
- * The level is the deseasonalized moving average. The slope is applied from
- * the centre of that window, not from the start of the lookback.
- */
+// Index 0 is the planning date. History is assumed to end the day before.
 export function forecastFromModel(model: DemandModel, asOf: string, days: number): number[] {
   if (model.window <= 0) return Array.from({ length: days }, () => 0);
   const forecasts: number[] = [];

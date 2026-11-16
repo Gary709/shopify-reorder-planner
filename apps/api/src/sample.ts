@@ -24,11 +24,8 @@ export function snapshotFromSample(
   raw: SampleFile,
   policies: Record<string, SkuPolicy> = {},
 ): StoreSnapshot {
-  if (raw.synthetic !== true || !raw.disclaimer || !/SYNTHETIC/i.test(raw.disclaimer)) {
-    throw new PlannerError(
-      'Bundled sample catalogue is not labelled synthetic. Refusing to load it.',
-      500,
-    );
+  if (raw.synthetic !== true || !raw.disclaimer || !/made[- ]up/i.test(raw.disclaimer)) {
+    throw new PlannerError('Sample file is not marked as made-up. Refusing to load it.', 500);
   }
   if (!raw.asOf || !raw.historyStart || !raw.timeZone || !raw.currency || !raw.shopName) {
     throw new PlannerError('Sample catalogue is missing planning dates or shop fields.', 500);

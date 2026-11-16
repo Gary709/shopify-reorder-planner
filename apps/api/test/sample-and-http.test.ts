@@ -8,11 +8,27 @@ describe('synthetic sample', () => {
   it('is labelled synthetic and produces every planning status under the defaults', () => {
     const snapshot = loadSampleSnapshot();
     expect(snapshot.synthetic).toBe(true);
-    expect(snapshot.disclaimer).toMatch(/SYNTHETIC/);
-    expect(snapshot.shopName).toMatch(/sample/i);
+    expect(snapshot.disclaimer).toMatch(/made-up/i);
+    expect(snapshot.disclaimer).toMatch(/not TinyFab sales/i);
+    expect(snapshot.shopName).toBe('TinyFab 3D');
     expect(snapshot.currency).toBe('AUD');
+    const byType = new Map<string, number>();
+    for (const variant of snapshot.variants) {
+      byType.set(variant.productType, (byType.get(variant.productType) ?? 0) + 1);
+    }
+    expect(byType.get('PLA Basic')).toBe(14);
+    expect(byType.get('PLA Matte')).toBe(7);
+    expect(byType.get('PETG')).toBe(12);
+    expect(byType.get('Pack')).toBe(1);
+    const black = snapshot.variants.find((variant) => variant.sku === 'TF-PLA BASIC-1KG-BLACK');
+    expect(black?.unitPrice).toBe(16.49);
+    expect(black?.unitCost).toBeNull();
+    expect(
+      snapshot.variants.find((variant) => variant.sku === 'TF-PACK-ESSENTIAL')?.unitPrice,
+    ).toBe(39.9);
     const plan = planStore(snapshot, DEFAULT_SETTINGS);
     expect(plan.source).toBe('sample');
+    expect(plan.purchaseOrder.hasUnknownCost).toBe(true);
     const statuses = new Set(plan.skus.map((sku) => sku.status));
     expect(statuses.has('stockout-risk')).toBe(true);
     expect(statuses.has('reorder')).toBe(true);
@@ -35,15 +51,6 @@ describe('synthetic sample', () => {
     expect(plan.purchaseOrder.totalUnits).toBe(
       plan.purchaseOrder.lines.reduce((sum, line) => sum + line.quantity, 0),
     );
-
-    const capped = planStore(snapshot, {
-      ...DEFAULT_SETTINGS,
-      budgetCap: Math.max(1, Math.round(plan.purchaseOrder.knownCost * 0.35)),
-    });
-    const reduced =
-      capped.purchaseOrder.withheld.length > 0 ||
-      capped.purchaseOrder.lines.some((line) => line.partial);
-    expect(reduced).toBe(true);
   });
 });
 

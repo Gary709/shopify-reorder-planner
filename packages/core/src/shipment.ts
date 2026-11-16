@@ -1,13 +1,7 @@
 import { fromCents, toCents } from './money.js';
 import type { PurchaseOrder, ShipmentGroup, ShipmentLine, SkuPlan, WithheldLine } from './types.js';
 
-/**
- * One sea-freight shipment. Lines with a suggested quantity are filled in
- * stock-out order, then by days of cover. A line takes its full suggestion
- * when the remaining budget can pay for it. Otherwise it takes the largest
- * whole number of cartons that still meets the MOQ. Unknown unit costs do
- * not consume the budget and are flagged.
- */
+// Soonest stock-out first. Unknown unit cost does not use up the budget.
 export function buildShipment(skus: readonly SkuPlan[], budgetCap: number | null): PurchaseOrder {
   const candidates = skus
     .filter((sku) => sku.inventoryTracked && sku.suggestedQty > 0)
@@ -48,7 +42,7 @@ export function buildShipment(skus: readonly SkuPlan[], budgetCap: number | null
       partial: decision.quantity < sku.suggestedQty,
       reason:
         decision.quantity < sku.suggestedQty
-          ? `Budget cap allows ${decision.quantity} of ${sku.suggestedQty} suggested units.`
+          ? `Budget only covers ${decision.quantity} of ${sku.suggestedQty}.`
           : orderReason(sku),
     });
   }
@@ -89,9 +83,9 @@ function compareNullable(a: string | number | null, b: string | number | null): 
 
 function orderReason(sku: SkuPlan): string {
   if (sku.stockoutBeforeArrival) {
-    return 'Projected stock-out before arrival. This quantity covers the review cycle after the lead time, not the sales lost while the boat is in transit.';
+    return 'Runs out before the boat lands. This qty is for after it arrives, not the weeks it is at sea.';
   }
-  return 'Inventory position is below the order-up-to level for the lead time plus the review period.';
+  return 'Under the level I want on hand when the next boat is due.';
 }
 
 function takeQuantity(
@@ -112,14 +106,14 @@ function takeQuantity(
   if (quantity >= sku.moq && quantity > 0) return { quantity, reason: '' };
   return {
     quantity: 0,
-    reason: `Budget cap does not cover the minimum purchasable quantity (${formatMinimum(sku)}).`,
+    reason: `Budget doesn't cover a full box (${formatMinimum(sku)}).`,
   };
 }
 
 function formatMinimum(sku: SkuPlan): string {
   const minimum = Math.max(sku.moq, sku.cartonSize);
   const rounded = Math.ceil(minimum / sku.cartonSize) * sku.cartonSize;
-  return `MOQ ${sku.moq}, cartons of ${sku.cartonSize}, so at least ${rounded}`;
+  return `minimum ${sku.moq}, box of ${sku.cartonSize}, so at least ${rounded}`;
 }
 
 function groupLines(lines: readonly ShipmentLine[]): ShipmentGroup[] {

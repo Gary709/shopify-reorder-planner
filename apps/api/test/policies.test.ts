@@ -6,7 +6,7 @@ import { repoRoot } from '../src/paths.js';
 describe('sku policies', () => {
   it('parses the committed example', () => {
     const raw = JSON.parse(readFileSync(`${repoRoot}/data/sku-policies.example.json`, 'utf8'));
-    expect(parsePolicies(raw)['TF-PLA-BLK-1KG']).toEqual({ moq: 20, cartonSize: 10 });
+    expect(parsePolicies(raw)['TF-PLA BASIC-1KG-BLACK']).toEqual({ moq: 10, cartonSize: 10 });
   });
 
   it('rejects a carton size of zero', () => {

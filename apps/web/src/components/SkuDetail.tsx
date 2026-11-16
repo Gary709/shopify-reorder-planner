@@ -19,56 +19,49 @@ export function SkuDetail({ plan, sku }: { plan: PlanResult; sku: SkuPlan }) {
       </header>
       {sku.stockoutBeforeArrival ? (
         <p className="callout">
-          Projected to reach zero on {dayLabel(sku.stockoutDate)}, before a shipment placed today
-          would arrive on {dayLabel(plan.arrivalDate)}. Quantity on this boat restocks the period
-          after arrival. It does not replace sales lost while the freight is at sea.
+          Hits zero on {dayLabel(sku.stockoutDate)}. A boat ordered today lands{' '}
+          {dayLabel(plan.arrivalDate)}. Ordering now does not cover the weeks it is at sea.
         </p>
       ) : null}
       {!sku.inventoryTracked ? (
         <p className="callout calm">
-          Inventory is not tracked for this variant, so the planner does not suggest a quantity.
+          Shopify is not tracking this colour, so I am not suggesting a qty.
         </p>
       ) : null}
       <ProjectionChart sku={sku} arrivalDate={plan.arrivalDate} />
       <dl className="facts">
         <Fact label="Shelf price" value={money(sku.unitPrice, plan.currency)} />
-        <Fact label="Unit cost" value={money(sku.unitCost, plan.currency)} />
-        <Fact label="On hand" value={units(sku.onHand)} />
-        <Fact label="Committed" value={units(sku.committed)} />
-        <Fact label="Available" value={units(sku.available)} />
-        <Fact label="Incoming" value={units(sku.incoming)} />
-        <Fact label="Units sold in lookback" value={units(sku.unitsSold)} />
         <Fact
-          label="Trailing moving average"
-          value={`${number(sku.trailingMovingAverage, 2)} /day`}
+          label="My cost"
+          value={sku.unitCost === null ? 'not on file' : money(sku.unitCost, plan.currency)}
         />
-        <Fact label="Forward velocity" value={`${number(sku.forwardDailyVelocity, 2)} /day`} />
-        <Fact label="Trend" value={`${number(sku.trendPerDay, 3)} /day²`} />
-        <Fact label="Residual σ" value={number(sku.residualStdev, 2)} />
+        <Fact label="On hand" value={units(sku.onHand)} />
+        <Fact label="Sold, not sent" value={units(sku.committed)} />
+        <Fact label="Can sell" value={units(sku.available)} />
+        <Fact label="Already on a boat" value={units(sku.incoming)} />
+        <Fact label="Sold in the window" value={units(sku.unitsSold)} />
+        <Fact label="Recent average" value={`${number(sku.trailingMovingAverage, 2)} /day`} />
+        <Fact label="Expected sales" value={`${number(sku.forwardDailyVelocity, 2)} /day`} />
+        <Fact label="Trend" value={`${number(sku.trendPerDay, 3)} per day`} />
+        <Fact label="Day-to-day noise" value={number(sku.residualStdev, 2)} />
         <Fact
-          label="Days of cover"
+          label="Days left"
           value={sku.daysOfCover === null ? '—' : number(sku.daysOfCover, 1)}
         />
-        <Fact label="Lead-time demand" value={number(sku.leadTimeDemand, 1)} />
+        <Fact label="Sales while the boat is coming" value={number(sku.leadTimeDemand, 1)} />
+        <Fact label="Extra to hold" value={number(sku.safetyStock, 1)} />
+        <Fact label="Reorder when stock hits" value={number(sku.reorderPoint, 1)} />
+        <Fact label="Want on hand after this order" value={number(sku.orderUpTo, 1)} />
+        <Fact label="Stock I can count" value={number(sku.inventoryPosition, 1)} />
+        <Fact label="Before rounding" value={number(sku.rawOrderQty, 1)} />
         <Fact
-          label={`Safety stock (z ${number(plan.serviceLevelZ, 2)})`}
-          value={number(sku.safetyStock, 1)}
-        />
-        <Fact label="Reorder point" value={number(sku.reorderPoint, 1)} />
-        <Fact label="Order-up-to" value={number(sku.orderUpTo, 1)} />
-        <Fact label="Inventory position" value={number(sku.inventoryPosition, 1)} />
-        <Fact label="Raw quantity" value={number(sku.rawOrderQty, 1)} />
-        <Fact
-          label="Suggested"
-          value={`${units(sku.suggestedQty)} (MOQ ${sku.moq}, carton ${sku.cartonSize})`}
+          label="Order"
+          value={`${units(sku.suggestedQty)} (min ${sku.moq}, box ${sku.cartonSize})`}
         />
       </dl>
       <div className="season">
-        <h3>Weekday index</h3>
-        <p>
-          1 is an average day. Estimated from this SKU’s lookback, not from a stored seasonal
-          calendar.
-        </p>
+        <h3>Which days it sells</h3>
+        <p>1 is a normal day for this colour, from its own order history.</p>
         <div className="season-bars" aria-hidden="true">
           {WEEKDAY_ORDER.map((weekday, index) => {
             const value = sku.seasonalIndex[weekday] ?? 1;

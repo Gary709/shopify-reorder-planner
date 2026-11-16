@@ -23,10 +23,7 @@ export function trailingMean(values: readonly number[], window: number): number 
   return mean(slice);
 }
 
-/**
- * Ordinary least squares of y against x = 0, 1, …, n−1.
- * Slope is in y-units per step.
- */
+// y against x = 0, 1, …, n−1.
 export function ordinaryLeastSquares(values: readonly number[]): {
   intercept: number;
   slope: number;

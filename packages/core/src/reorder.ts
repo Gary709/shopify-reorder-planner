@@ -12,11 +12,7 @@ export function daysOfCover(available: number, dailyVelocity: number): number | 
   return available / dailyVelocity;
 }
 
-/**
- * Round a positive raw quantity up to the minimum order quantity and then up
- * to a whole number of cartons. A non-positive raw quantity stays zero: the
- * MOQ does not by itself create an order.
- */
+// Zero stays zero. A positive gap rounds up to the MOQ, then to a full box.
 export function roundOrderQuantity(raw: number, moq: number, cartonSize: number): number {
   if (!Number.isFinite(raw)) throw new PlannerError('raw order quantity must be finite');
   if (raw <= 1e-6) return 0;
@@ -36,12 +32,7 @@ export interface StockProjection {
   stockoutBeforeArrival: boolean;
 }
 
-/**
- * Lost-sales stock path. Existing incoming, and the new shipment when
- * requested, are added at the start of the lead-time day, before that day's
- * demand. Shopify's incoming quantity has no arrival date, so the lead time
- * is the assumption.
- */
+// Incoming and the new order land at the start of the lead-time day. No backorders.
 export function projectStock(args: {
   asOf: string;
   available: number;
