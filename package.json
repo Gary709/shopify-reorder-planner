@@ -1,0 +1,38 @@
+{
+  "name": "shopify-reorder-planner",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Inventory and reorder planner for a Shopify store with long sea-freight lead times.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c cyan,magenta \"npm run dev -w @tinyfab/api\" \"npm run dev -w @tinyfab/web\"",
+    "start": "npm run start -w @tinyfab/api",
+    "build": "npm run build -w @tinyfab/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "generate-sample": "npm run generate-sample -w @tinyfab/api"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "prettier": "^3.6.2",
+    "@types/node": "^22.19.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^3.2.4"
+  }
+}

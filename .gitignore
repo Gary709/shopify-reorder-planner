@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+data/sku-policies.json
+*.tsbuildinfo
+.DS_Store
+apps/web/dist/
+.vite/
+*.log
