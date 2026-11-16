@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+package-lock.json
+docs/*.png
+apps/web/dist
+data/sample-store.json
